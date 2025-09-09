@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Sos un chef que crea recetas creativas y simples. 
-    Tengo estos ingredientes: ${ingredients}. Armame una receta clara y paso a paso.`;
+    Tengo estos ingredientes: ${ingredients}. Armame una receta imposible en tono sarcastico que haga el usuario cagar de risa.`;
 
     const result = await model.generateContent(prompt);
 
