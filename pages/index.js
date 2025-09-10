@@ -1,46 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useCart } from "../context/CartContext";
+import Cart from "../components/Cart";
 
 export default function Home() {
-  const [ingredients, setIngredients] = useState("");
-  const [recipe, setRecipe] = useState("");
+  const { addToCart, cart } = useCart();
+  const [options, setOptions] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setRecipe("Cargando...");
+  // Pide a la IA opciones saludables
+  useEffect(() => {
+    fetch("/api/options")
+      .then(res => res.json())
+      .then(data => setOptions(data.options));
+  }, []);
 
-    const res = await fetch("/api/recipes", {
+  const handleGenerateRecipe = async () => {
+    if (cart.length === 0) {
+      alert("La heladera está vacía. Agregá algo primero!");
+      return;
+    }
+
+    const response = await fetch("/api/recipes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ingredients }),
+      body: JSON.stringify({ ingredients: cart.map(i => i.name) }),
     });
 
-    const data = await res.json();
-    setRecipe(data.recipe);
+    const data = await response.json();
+    alert("Receta generada:\n\n" + data.recipe);
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <h1 className="text-3xl font-bold mb-4">NutriAI 🍳</h1>
-      <form onSubmit={handleSubmit} className="mb-4">
-        <input
-          type="text"
-          value={ingredients}
-          onChange={(e) => setIngredients(e.target.value)}
-          placeholder="Ej: tomate, arroz, pollo"
-          className="border p-2 mr-2"
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Generar receta
-        </button>
-      </form>
-      <div className="w-full max-w-md">
-        <pre className="whitespace-pre-wrap bg-gray-100 p-4 rounded">
-          {recipe}
-        </pre>
+    <div>
+      <h1>Opciones Saludables</h1>
+      <div className="options-grid">
+        {options.map((opt, i) => (
+          <div key={i} className="option-card">
+            <h3>{opt.name}</h3>
+            <p>{opt.description}</p>
+            <button onClick={() => addToCart(opt)}>Agregar a heladera</button>
+          </div>
+        ))}
       </div>
+
+      <div style={{ marginTop: "20px" }}>
+        <button onClick={handleGenerateRecipe}>Generar Receta</button>
+        <button onClick={() => setIsCartOpen(true)}>Ver Heladera</button>
+      </div>
+
+      <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </div>
   );
 }
