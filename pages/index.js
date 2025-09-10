@@ -1,54 +1,65 @@
-import { useEffect, useState } from "react";
-import { useCart } from "../context/CartContext";
-import Cart from "../components/Cart";
+import { useRouter } from "next/router";
+import { GiFruitBowl } from "react-icons/gi";
 
 export default function Home() {
-  const { addToCart, cart } = useCart();
-  const [options, setOptions] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-
-  // Pide a la IA opciones saludables
-  useEffect(() => {
-    fetch("/api/options")
-      .then(res => res.json())
-      .then(data => setOptions(data.options));
-  }, []);
-
-  const handleGenerateRecipe = async () => {
-    if (cart.length === 0) {
-      alert("La heladera está vacía. Agregá algo primero!");
-      return;
-    }
-
-    const response = await fetch("/api/recipes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ingredients: cart.map(i => i.name) }),
-    });
-
-    const data = await response.json();
-    alert("Receta generada:\n\n" + data.recipe);
-  };
+  const router = useRouter();
 
   return (
-    <div>
-      <h1>Opciones Saludables</h1>
-      <div className="options-grid">
-        {options.map((opt, i) => (
-          <div key={i} className="option-card">
-            <h3>{opt.name}</h3>
-            <p>{opt.description}</p>
-            <button onClick={() => addToCart(opt)}>Agregar a heladera</button>
-          </div>
-        ))}
-      </div>
+    <div style={{ padding: "20px", textAlign: "center" }}>
+      <h1>🍳 Bienvenido al Generador de Recetas</h1>
+      <p style={{ marginTop: "20px", fontSize: "18px" }}>Instrucciones:</p>
+      <ul
+        style={{
+          textAlign: "left",
+          maxWidth: "600px",
+          margin: "20px auto",
+          fontSize: "16px",
+        }}
+      >
+        <li>
+          1. Prepará una lista de ingredientes que tenés disponbiles para
+          cocinar hoy. Podés escribir los ingredientes o seleccionar sugerencias
+          de AI.
+        </li>
+        <li>
+          2. Apretá el botón <b>Generar Receta</b> para obtener una receta
+          automáticamente.
+        </li>
+        <li>
+          3. Si querés, podés guardar la receta, generar una nueva o volver a
+          cambiar los ingredientes.
+        </li>
+        <li>
+          4. En cualquier momento podés ver los ingredientes disponibles en la
+          heladera con el botón <GiFruitBowl color="#4caf50" />.
+        </li>
+      </ul>
 
-      <div style={{ marginTop: "20px" }}>
-        <button onClick={handleGenerateRecipe}>Generar Receta</button>
-        <button onClick={() => setIsCartOpen(true)}>Ver Heladera</button>
-      </div>
-
-      <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <button
+        style={{
+          marginTop: "30px",
+          padding: "10px 20px",
+          fontSize: "16px",
+          cursor: "pointer",
+        }}
+        onClick={() => router.push("/lista")}
+      >
+        Ir a la Lista de Ingredientes
+      </button>
+      <p
+        style={{
+          marginTop: "40px",
+          fontSize: "14px",
+          color: "gray",
+          maxWidth: "600px",
+          marginLeft: "auto",
+          marginRight: "auto",
+        }}
+      >
+        ⚠️ Esta página utiliza servicios gratuitos de Gemini AI. Si se excede la
+        cuota de IA generativa, se devolverá una receta de ensalada con
+        ingredientes repetidos como fallback.
+      </p>
     </div>
   );
 }

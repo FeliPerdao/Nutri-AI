@@ -1,10 +1,14 @@
 import { useState } from "react";
 import Link from "next/link";
-import { GiFruitBowl } from "react-icons/gi"; // cambiamos a icono heladera
+import { GiFruitBowl } from "react-icons/gi";
+import { FaUtensils } from "react-icons/fa";
+import { GiCookingPot } from "react-icons/gi";
+import { useRouter } from "next/router";
 import Cart from "./Cart";
 
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <header
@@ -17,6 +21,7 @@ const Header = () => {
       }}
     >
       <h1 style={{ margin: 0 }}>🍽️ Mi Cocina Saludable</h1>
+
       <nav>
         <ul
           style={{
@@ -25,27 +30,31 @@ const Header = () => {
             gap: "20px",
             margin: 0,
             padding: 0,
+            alignItems: "center",
           }}
         >
           <li>
             <Link href="/recetas">Recetas</Link>
           </li>
           <li>
-            <Link href="/lista">Lista de Compras</Link>
+            <Link href="/lista">Lista de Ingredientes</Link>
           </li>
           <li>
-            <Link href="/acerca">Acerca de</Link>
+            <Link href="/acerca">Contacto</Link>
           </li>
           <li>
             <button
+              style={{ display: "flex", alignItems: "center", gap: "5px" }}
+              onClick={() => router.push("/NuevaReceta")}
+            >
+              <GiCookingPot size={20} /> Generar Receta
+            </button>
+          </li>
+          <li>
+            <button
+              style={{ display: "flex", alignItems: "center", gap: "5px" }}
               onClick={() => setIsCartOpen(true)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-              }}
+              
             >
               <GiFruitBowl size={24} color="#4caf50" />
             </button>
