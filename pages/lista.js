@@ -6,19 +6,39 @@ export default function ListaCompras() {
   const [options, setOptions] = useState([]);
   const [selected, setSelected] = useState([]);
   const [customItem, setCustomItem] = useState("");
+  const [historial, setHistorial] = useState(new Set()); // ingredientes ya mostrados
+  const [loading, setLoading] = useState(false); // 🔥 nuevo estado
 
-  // Cargar opciones desde la API
-  useEffect(() => {
+  // Cargar opciones desde la API evitando repetidos
+  const cargarOpciones = () => {
+    setLoading(true); // empezamos carga
     fetch("/api/options")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.options)) {
-          setOptions(data.options);
+          // filtrar repetidos
+          const nuevas = data.options.filter((opt) => !historial.has(opt.name));
+
+          if (nuevas.length > 0) {
+            setOptions(nuevas);
+            setHistorial((prev) => {
+              const actualizado = new Set(prev);
+              nuevas.forEach((opt) => actualizado.add(opt.name));
+              return actualizado;
+            });
+          } else {
+            setOptions([]);
+          }
         } else {
           console.error("Respuesta inesperada:", data);
         }
       })
-      .catch((err) => console.error("Error al cargar opciones:", err));
+      .catch((err) => console.error("Error al cargar opciones:", err))
+      .finally(() => setLoading(false)); // siempre terminamos la carga
+  };
+
+  useEffect(() => {
+    cargarOpciones();
   }, []);
 
   const handleToggle = (itemName) => {
@@ -30,8 +50,8 @@ export default function ListaCompras() {
   };
 
   const handleAddSelectedToCart = () => {
-    selected.forEach((name) =>
-      addToCart({ id: name, name }) // usamos name como id
+    selected.forEach(
+      (name) => addToCart({ id: name, name }) // usamos name como id
     );
     setSelected([]);
   };
@@ -47,7 +67,9 @@ export default function ListaCompras() {
     <div style={{ padding: "20px" }}>
       <h1>Lista de Compras Saludables</h1>
 
-      {/* Validación y renderizado seguro */}
+      {/* Mensaje de cargando arriba de la lista actual */}
+      {loading && <p>Cargando ingredientes...</p>}
+
       {Array.isArray(options) && options.length > 0 ? (
         <ul style={{ listStyle: "none", padding: 0 }}>
           {options.map((opt, idx) => (
@@ -62,10 +84,18 @@ export default function ListaCompras() {
           ))}
         </ul>
       ) : (
-        <p>No se encontraron opciones saludables.</p>
+        !loading && <p>Ya no hay más opciones nuevas disponibles 🎉</p>
       )}
 
-      <button onClick={handleAddSelectedToCart} style={{ marginTop: "10px" }}>
+      {/* Botón Otras Opciones */}
+      <button
+        onClick={cargarOpciones}
+        style={{ marginTop: "20px", marginRight: "10px" }}
+      >
+        🔄 Otras opciones
+      </button>
+
+      <button onClick={handleAddSelectedToCart} style={{ marginTop: "20px" }}>
         Añadir seleccionados a la heladera
       </button>
 

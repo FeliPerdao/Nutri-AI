@@ -6,16 +6,17 @@ export default async function handler(req, res) {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const prompt = `Genera exactamente 5 INGREDIENTES saludables en formato JSON.
+    const prompt = `Genera 20 INGREDIENTES saludables, variados y sorprendentes de diferentes culturas (ej: mediterránea, asiática, latinoamericana).
 Cada ingrediente debe tener:
-- "id": un identificador único (ej: "zanahoria", "manzana")
-- "name": una sola palabra (ej: "Zanahoria", "Manzana", "Quinoa")
-- "description": una breve descripción de por qué es saludable.
+- "id": un identificador único en minúsculas y sin espacios (ej: "miso", "chia")
+- "name": el nombre visible del ingrediente (ej: "Miso", "Chía", "Bok Choy")
+- "description": una breve explicación de por qué es saludable.
 
-Ejemplo:
+No repitas ingredientes comunes como tomate, lechuga, zanahoria o espinaca.
+Formato: JSON válido, sin texto extra. Ejemplo:
 [
-  { "id": "zanahoria", "name": "Zanahoria", "description": "Fuente de vitamina A y betacarotenos" },
-  { "id": "quinoa", "name": "Quinoa", "description": "Cereal rico en proteínas y aminoácidos esenciales" }
+  { "id": "miso", "name": "Miso", "description": "Fermentado rico en probióticos y proteínas vegetales" },
+  { "id": "chia", "name": "Chía", "description": "Semillas ricas en omega-3 y fibra" }
 ]`;
 
     const result = await model.generateContent(prompt);
@@ -27,15 +28,47 @@ Ejemplo:
     let options = [];
     try {
       options = JSON.parse(text);
+
+      // eliminar duplicados por id
+      const seen = new Set();
+      options = options.filter((o) => {
+        if (!o.id) return false;
+        if (seen.has(o.id)) return false;
+        seen.add(o.id);
+        return true;
+      });
+
+      // elegir 5 random
+      options = options.sort(() => 0.5 - Math.random()).slice(0, 5);
     } catch (err) {
-      console.error("Error al parsear JSON de Gemini:", text);
-      // fallback si Gemini devuelve cualquier cosa rara
+      console.error("Error al parsear JSON de Gemini:", text, err);
+      // fallback si Gemini devuelve JSON inválido
       options = [
-        { id: "tomate", name: "Tomate", description: "Rico en antioxidantes y vitamina C" },
-        { id: "zanahoria", name: "Zanahoria", description: "Fuente de vitamina A y betacarotenos" },
-        { id: "quinoa", name: "Quinoa", description: "Cereal rico en proteínas y aminoácidos esenciales" },
-        { id: "palta", name: "Palta", description: "Grasas saludables y fibra" },
-        { id: "espinaca", name: "Espinaca", description: "Rica en hierro y vitaminas A, C y K" },
+        {
+          id: "quinoa",
+          name: "Quinoa",
+          description: "Cereal rico en proteínas y aminoácidos esenciales",
+        },
+        {
+          id: "miso",
+          name: "Miso",
+          description: "Fermentado rico en probióticos y proteínas vegetales",
+        },
+        {
+          id: "chia",
+          name: "Chía",
+          description: "Semillas ricas en omega-3 y fibra",
+        },
+        {
+          id: "bokchoy",
+          name: "Bok Choy",
+          description: "Verdura asiática rica en vitaminas A, C y K",
+        },
+        {
+          id: "almendras",
+          name: "Almendras",
+          description: "Fuente de grasas saludables, proteínas y magnesio",
+        },
       ];
     }
 
@@ -45,13 +78,36 @@ Ejemplo:
 
     // fallback si Gemini no responde (ej: cuota excedida)
     const fallbackOptions = [
-      { id: "tomate", name: "Tomate", description: "Rico en antioxidantes y vitamina C" },
-      { id: "zanahoria", name: "Zanahoria", description: "Fuente de vitamina A y betacarotenos" },
-      { id: "quinoa", name: "Quinoa", description: "Cereal rico en proteínas y aminoácidos esenciales" },
-      { id: "palta", name: "Palta", description: "Grasas saludables y fibra" },
-      { id: "espinaca", name: "Espinaca", description: "Rica en hierro y vitaminas A, C y K" },
+      {
+        id: "quinoa",
+        name: "Quinoa",
+        description: "Cereal rico en proteínas y aminoácidos esenciales",
+      },
+      {
+        id: "miso",
+        name: "Miso",
+        description: "Fermentado rico en probióticos y proteínas vegetales",
+      },
+      {
+        id: "chia",
+        name: "Chía",
+        description: "Semillas ricas en omega-3 y fibra",
+      },
+      {
+        id: "bokchoy",
+        name: "Bok Choy",
+        description: "Verdura asiática rica en vitaminas A, C y K",
+      },
+      {
+        id: "almendras",
+        name: "Almendras",
+        description: "Fuente de grasas saludables, proteínas y magnesio",
+      },
     ];
 
-    res.status(200).json({ options: fallbackOptions, error: "Usando fallback por error en Gemini" });
+    res.status(200).json({
+      options: fallbackOptions,
+      error: "Usando fallback por error en Gemini",
+    });
   }
 }

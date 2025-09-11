@@ -10,6 +10,13 @@ export default function Recetas() {
     setRecetas(guardadas);
   }, []);
 
+  const handleEliminar = (id) => {
+    const nuevas = recetas.filter((r) => r.id !== id);
+    setRecetas(nuevas);
+    localStorage.setItem("recetasGuardadas", JSON.stringify(nuevas));
+    setSelected(null); // cerrar modal después de eliminar
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <h1>Mis Recetas Guardadas</h1>
@@ -96,6 +103,21 @@ export default function Recetas() {
             <pre style={{ whiteSpace: "pre-wrap", marginTop: "10px" }}>
               {selected.content}
             </pre>
+
+            <button
+              onClick={() => handleEliminar(selected.id)}
+              style={{
+                marginTop: "20px",
+                padding: "10px 20px",
+                backgroundColor: "red",
+                color: "#fff",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+            >
+              🗑️ Eliminar Receta
+            </button>
           </div>
         </div>
       )}
