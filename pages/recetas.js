@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 export default function Recetas() {
   const [recetas, setRecetas] = useState([]);
-  const [selected, setSelected] = useState(null); // receta seleccionada para el modal
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     const guardadas =
@@ -14,11 +14,11 @@ export default function Recetas() {
     const nuevas = recetas.filter((r) => r.id !== id);
     setRecetas(nuevas);
     localStorage.setItem("recetasGuardadas", JSON.stringify(nuevas));
-    setSelected(null); // cerrar modal después de eliminar
+    setSelected(null);
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div className="container">
       <h1>Mis Recetas Guardadas</h1>
 
       {recetas.length === 0 ? (
@@ -35,22 +35,9 @@ export default function Recetas() {
           {recetas.map((r) => (
             <div
               key={r.id}
+              className="card"
               onClick={() => setSelected(r)}
-              style={{
-                cursor: "pointer",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                padding: "10px",
-                width: "200px",
-                boxShadow: "2px 2px 6px rgba(0,0,0,0.1)",
-                transition: "transform 0.2s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.05)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              style={{ cursor: "pointer", width: "200px" }}
             >
               <h3>{r.title}</h3>
             </div>
@@ -58,7 +45,6 @@ export default function Recetas() {
         </div>
       )}
 
-      {/* Modal */}
       {selected && (
         <div
           style={{
@@ -75,10 +61,8 @@ export default function Recetas() {
           }}
         >
           <div
+            className="card"
             style={{
-              backgroundColor: "#fff",
-              padding: "20px",
-              borderRadius: "10px",
               maxWidth: "600px",
               maxHeight: "80%",
               overflowY: "auto",
@@ -103,18 +87,9 @@ export default function Recetas() {
             <pre style={{ whiteSpace: "pre-wrap", marginTop: "10px" }}>
               {selected.content}
             </pre>
-
             <button
               onClick={() => handleEliminar(selected.id)}
-              style={{
-                marginTop: "20px",
-                padding: "10px 20px",
-                backgroundColor: "red",
-                color: "#fff",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
+              style={{ marginTop: "20px", backgroundColor: "red" }}
             >
               🗑️ Eliminar Receta
             </button>

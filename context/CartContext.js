@@ -4,6 +4,7 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Agrega item solo si no existe
   const addToCart = (item) => {
@@ -12,6 +13,7 @@ export function CartProvider({ children }) {
       if (exists) return prev;
       return [...prev, item];
     });
+    setIsCartOpen(true);
   };
 
   // Elimina item por id
@@ -22,9 +24,20 @@ export function CartProvider({ children }) {
   // Vacía toda la heladera
   const handleClearCart = () => setCart([]);
 
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, handleRemoveItem, handleClearCart }}
+      value={{
+        cart,
+        addToCart,
+        handleRemoveItem,
+        handleClearCart,
+        isCartOpen,
+        openCart,
+        closeCart,
+      }}
     >
       {children}
     </CartContext.Provider>

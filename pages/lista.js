@@ -6,17 +6,16 @@ export default function ListaCompras() {
   const [options, setOptions] = useState([]);
   const [selected, setSelected] = useState([]);
   const [customItem, setCustomItem] = useState("");
-  const [historial, setHistorial] = useState(new Set()); // ingredientes ya mostrados
-  const [loading, setLoading] = useState(false); // 🔥 nuevo estado
+  const [historial, setHistorial] = useState(new Set());
+  const [loading, setLoading] = useState(false);
 
   // Cargar opciones desde la API evitando repetidos
   const cargarOpciones = () => {
-    setLoading(true); // empezamos carga
+    setLoading(true);
     fetch("/api/options")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.options)) {
-          // filtrar repetidos
           const nuevas = data.options.filter((opt) => !historial.has(opt.name));
 
           if (nuevas.length > 0) {
@@ -34,7 +33,7 @@ export default function ListaCompras() {
         }
       })
       .catch((err) => console.error("Error al cargar opciones:", err))
-      .finally(() => setLoading(false)); // siempre terminamos la carga
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -50,9 +49,7 @@ export default function ListaCompras() {
   };
 
   const handleAddSelectedToCart = () => {
-    selected.forEach(
-      (name) => addToCart({ id: name, name }) // usamos name como id
-    );
+    selected.forEach((name) => addToCart({ id: name, name }));
     setSelected([]);
   };
 
@@ -67,7 +64,6 @@ export default function ListaCompras() {
     <div style={{ padding: "20px" }}>
       <h1>Lista de Compras Saludables</h1>
 
-      {/* Mensaje de cargando arriba de la lista actual */}
       {loading && <p>Cargando ingredientes...</p>}
 
       {Array.isArray(options) && options.length > 0 ? (
@@ -87,7 +83,6 @@ export default function ListaCompras() {
         !loading && <p>Ya no hay más opciones nuevas disponibles 🎉</p>
       )}
 
-      {/* Botón Otras Opciones */}
       <button
         onClick={cargarOpciones}
         style={{ marginTop: "20px", marginRight: "10px" }}
@@ -101,7 +96,6 @@ export default function ListaCompras() {
 
       <hr style={{ margin: "20px 0" }} />
 
-      {/* Campo para productos manuales */}
       <h3>Agregar producto personalizado</h3>
       <input
         type="text"
